@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Playwright Sandbox</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="sandbox-header"><h1>Playwright Sandbox</h1></header>
+    <main class="sandbox-main">
+      <form id="sandboxForm" class="sandbox-form">
+        <label>
+          名称
+          <input data-testid="name" placeholder="输入名称" autocomplete="off" required />
+        </label>
+        <label>
+          优先级
+          <select data-testid="priority">
+            <option value="low">低</option>
+            <option value="medium">中</option>
+            <option value="high">高</option>
+          </select>
+        </label>
+        <button data-testid="confirm" type="submit">确认</button>
+      </form>
+      <div id="result" class="sandbox-result" role="status" hidden></div>
+    </main>
+    <script src="/sandbox.js" defer></script>
+  </body>
+</html>
