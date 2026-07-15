@@ -2,7 +2,6 @@
 # Agent Console
 
 ```powershell
-cd 'G:\SBNIGGA233\THE GRAND DEMO'
 npm.cmd start
 ```
 我在用microsoft edge浏览器所以如果你用的不是这个的话需要去./.env那个文件把msedge改成你的浏览器核心
