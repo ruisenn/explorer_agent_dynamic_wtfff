@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Agent Console
 
 ```powershell
@@ -13,3 +14,7 @@ npm.cmd start
 + DOM 摘要、可选截图感知、实时浏览器画面和事件记录。
 + 运行和停止控制。
 
+=======
+# explorer_agent_dynamic_wtfff
+for camp comm
+>>>>>>> 15ef5b07b6e2dd887e59aae5585bf19725f845e5
