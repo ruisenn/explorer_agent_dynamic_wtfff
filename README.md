@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Agent Console
 
 ```powershell
@@ -9,11 +8,7 @@ npm.cmd start
 打开 <http://127.0.0.1:3100>。
 默认沙盒目 <http://127.0.0.1:3100/sandbox>。
 
-+ OpenAI-compatible `/chat/completions` Agent 规划器。
++ OpenAI-compatible `/chat/completions` Agent 
 + DOM 摘要、可选截图感知、实时浏览器画面和事件记录。
 + 运行和停止控制。
 
-=======
-# explorer_agent_dynamic_wtfff
-for camp comm
->>>>>>> 15ef5b07b6e2dd887e59aae5585bf19725f845e5
