@@ -26,7 +26,7 @@ Playwright Chromium：
 ```
 
 接口发现：<http://127.0.0.1:3100/>
-
+沙箱 <http://127.0.0.1:3100/sandbox/>
 OpenAPI 文档：<http://127.0.0.1:3100/docs>
 
 ## 接口
