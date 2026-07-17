@@ -11,7 +11,8 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.agent import AgentRunner
 
@@ -19,6 +20,7 @@ from src.agent import AgentRunner
 ROOT_DIR = Path(__file__).resolve().parent
 RUNTIME_DIR = ROOT_DIR / "runtime"
 FIXTURE_DIR = ROOT_DIR / "fixtures"
+SANDBOX_DIR = ROOT_DIR / "windowsXP-simulation"
 
 load_dotenv(ROOT_DIR / ".env")
 
@@ -157,6 +159,23 @@ app.add_middleware(
 )
 
 
+@app.get("/sandbox", include_in_schema=False)
+async def sandbox_redirect() -> RedirectResponse:
+    return RedirectResponse(url="/sandbox/", status_code=307)
+
+
+@app.get("/sandbox/", include_in_schema=False)
+async def sandbox() -> FileResponse:
+    return FileResponse(SANDBOX_DIR / "demo.html", media_type="text/html")
+
+
+app.mount(
+    "/sandbox/img",
+    StaticFiles(directory=SANDBOX_DIR / "img"),
+    name="sandbox-images",
+)
+
+
 def json_response(status_code: int, body: dict) -> JSONResponse:
     return JSONResponse(
         status_code=status_code,
@@ -192,10 +211,11 @@ async def index() -> JSONResponse:
         200,
         {
             "name": "Agent Playwright Demo",
-            "mode": "api-only",
+            "mode": "api-with-sandbox",
             "docs": "/docs",
             "openapi": "/openapi.json",
             "endpoints": {
+                "sandbox": "GET /sandbox",
                 "health": "GET /api/health",
                 "status": "GET /api/status",
                 "events": "GET /api/events",

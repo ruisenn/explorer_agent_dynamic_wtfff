@@ -24,8 +24,14 @@ class AppRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(health.json()["ok"])
         discovery = await self.client.get("/")
         self.assertEqual(discovery.status_code, 200)
-        self.assertEqual(discovery.json()["mode"], "api-only")
-        self.assertEqual((await self.client.get("/sandbox")).status_code, 404)
+        self.assertEqual(discovery.json()["mode"], "api-with-sandbox")
+        sandbox_redirect = await self.client.get("/sandbox")
+        self.assertEqual(sandbox_redirect.status_code, 307)
+        self.assertEqual(sandbox_redirect.headers["location"], "/sandbox/")
+        sandbox = await self.client.get("/sandbox/")
+        self.assertEqual(sandbox.status_code, 200)
+        self.assertIn("windowsXP", sandbox.text)
+        self.assertEqual((await self.client.get("/sandbox/img/bliss.jpg")).status_code, 200)
         self.assertEqual((await self.client.get("/app.js")).status_code, 404)
 
     async def test_run_requires_json_content_type(self) -> None:
