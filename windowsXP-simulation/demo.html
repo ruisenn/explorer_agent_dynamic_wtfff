@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="zh">  <!--把页面语言调成中文-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>windowsXP模拟器</title>
+    <style>/**是“通配符”，选中页面上的毛坯房(元素)进行精加工*/
+* {
+margin: 0;  /*去掉所有元素的外边框（浏览器默认有边距）*/
+padding: 0;  /*去掉所有元素的内边距*/
+box-sizing: border-box;/*把边框算进盒子里面*/
+}
+
+body {
+background: #2a6ea5; /* 改成XP蓝色背景 */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    margin: 0;
+    font-family: '宋体', SimSun, serif;
+}
+
+/* ===== 顶部信息栏 ===== */
+.game-header {
+    width: 1300px; 
+    background: linear-gradient(to bottom, #f0f0f0, #d4d4d4);
+    border: 2px solid #0a2a4a;
+    border-radius: 8px 8px 0 0;
+    padding: 18px 50px;
+    margin-bottom: 40px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;  /* 改成纵向 */
+    align-items: flex-start; /* 左对齐，或者 center 居中 */
+    gap: 20px;              /* 标题和统计栏之间的间距 */
+}
+
+.game-title {
+    font-size: 30px;
+    font-weight: bold;
+    color: #0a2a4a;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+    font-family: '微软雅黑', '宋体', sans-serif;
+    margin-bottom: 20px;
+    margin-top: 10px;
+    background: linear-gradient(to right, #0055aa, #0088ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.game-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    background: rgba(255,255,255,0.6);
+    padding: 6px 25px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 16px;
+    color: #1a1a1a;
+}
+
+.stat-icon {
+    font-size: 16px;
+}
+
+.stat-label {
+    color: #555;
+    font-weight: bold;
+}
+
+.stat-value {
+    color: #0033aa;
+    font-weight: bold;
+    font-family: 'Consolas', monospace;
+    display: inline-block;
+}
+
+/*crt是显示器容器，名称前加点表示一个类名*/
+.crt {
+width: 820px;/*固定屏幕是经典4:3比例*/
+height: 620px;
+margin: 0;
+border: 3px solid #0a2a4a;
+border-top: none;
+border-radius: 0 0 8px 8px;
+position: relative;/*让内部绝对定位的元素相对于此定位*/
+overflow: hidden;/*超出的部分隐藏，保持边界干净*/
+flex-shrink: 0;
+box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+background:url("img/bliss.jpg") no-repeat center center;/*url是路径，可以相对也可以绝对*/
+background-size:cover;    /*让壁纸铺满整个显示器*/
+}
+
+/* ===== 底部信息（类似7k7k的游戏说明） ===== */
+.game-footer {
+    width: 820px;
+    background: linear-gradient(to bottom, #d4d4d4, #b8b8b8);
+    border: 2px solid #0a2a4a;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 8px 20px;
+    margin-top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #333;
+}
+
+.game-footer .hint {
+    display: flex;
+    gap: 20px;
+}
+
+.game-footer .hint span {
+    background: rgba(255,255,255,0.3);
+    padding: 2px 12px;
+    border-radius: 4px;
+    border: 1px solid #999;
+}
+
+.game-footer .credit {
+    color: #666;
+    font-size: 11px;
+}
+
+.taskbar {
+    position: absolute;/*绝对定位，相当于.crt容器*/
+    bottom: 0;/*贴在底部*/
+    left: 0;/*贴在左边*/
+    right: 0;/*贴在右边，宽度撑满*/
+    height: 40px;/*任务栏高度*/
+    background:linear-gradient(to bottom, #0786C9, #10A2DE);
+    border-top: 3px solid #6a9ad4;/*一条浅蓝的边框*/
+    border-bottom:1px solid #1F709B ;
+    display: flex;/*弹性布局，让元素水平排列*/
+    align-items: center;/*垂直居中*/
+    padding: 0 0;/*左右边内距，让内容不贴边*/
+    margin-top: -2px;
+}
+.taskbar-center {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.start-btn {
+background:linear-gradient(to bottom, #059003, #12BA0C);
+color: white;/*白色文字*/
+font-family: '宋体', SimSun, serif;  /* 宋体 */
+font-size: 25px;/*字号*/
+font-weight:lighter;
+padding: 0 28px 2px 19px;        /* 上 右 下 左 */
+font-style: italic;
+height: 38px;
+display: flex;
+align-items: center;
+gap: 8px;                /* 图标和文字之间的间距 */
+border-radius: 6px 15px 15px 6px;
+cursor: pointer;         /* 鼠标变成手指 */
+ margin: 0;                     /* 清除默认外边距 */
+ margin-top: -2px;
+border-top: 6px solid #0A634D; /* 上边框保留（贴住任务栏上边缘） */
+border-left: 1px solid #306B2B; /* 左边框保留（贴住任务栏左边缘） */
+border-bottom: 4px solid #6a9ad4; /* 左边框保留（贴住任务栏左边缘） */
+border-right:5px solid #008139; /* 右下边框暗绿色（3D凸起效果） */
+}
+.start-btn:active {
+    border-color: #1a4a1a;
+    border-right-color: #6aaa6a;
+    border-bottom-color: #6aaa6a;
+}
+
+/* ===== Windows 四色图标 ===== */
+.win-logo {
+    display: grid;              /* 网格布局：2行2列 */
+    grid-template-columns: 10px 10px;  /* 每列宽10px */
+    grid-template-rows: 10px 10px;     /* 每行高10px */
+    gap: 1px;                   /* 格子间距1px */
+    flex-shrink: 0;            /* 防止被压缩变形 */
+    transform: skewX(-24deg);  /* ← 倾斜，和斜体文字方向一致 */
+    filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.5)); /* 整体向右下投影 */
+}
+
+.win-logo .block {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border:1px;
+}
+
+/* 四个颜色 */
+.win-logo .red    { background: #FF3B30; }
+.win-logo .green  { background: #34C759; }
+.win-logo .blue   { background: #007AFF; }
+.win-logo .yellow { background: #FFCC00; }
+
+/* ===== 时钟 ===== */
+.clock {
+    background: #6a9ad4;
+    height: 40px;
+    padding: 0 10px;
+    border: 2px solid #6a9ad4;
+    display: flex;
+    align-items:center;
+    color: #c0e0ff;
+    font-size: 13px;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-weight: bold;
+    min-width: 80px;
+    justify-content:center;
+}
+
+/* ===== 任务栏中的CPU指示器 ===== */
+        .cpu-indicator {
+            background: rgba(0,0,0,0.6);
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: #7fdbff;
+            font-size: 11px;
+            font-family: 'Consolas', monospace;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #3a6a8a;
+            height: 24px;
+        }
+
+        .cpu-bar {
+            width: 60px;
+            height: 12px;
+            background: #1a2a3a;
+            border-radius: 2px;
+            overflow: hidden;
+            border: 1px solid #2a4a5a;
+        }
+
+        .cpu-fill {
+            height: 100%;
+            width: 5%;
+            background: linear-gradient(to right, #4caf50, #ffeb3b, #f44336);
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+/* ===== 弹窗样式 ===== */
+        .messenger-popup {
+            position: fixed;
+            background: #c0c0c0;
+            border: 2px solid #000080;
+            min-width: 280px;
+            min-height: 120px;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+            font-family: '宋体', SimSun, serif;
+            animation: popupAppear 0.15s ease-out;
+        }
+
+        @keyframes popupAppear {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .popup-title {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 4px 8px;
+            font-weight: bold;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            cursor: default;
+        }
+
+        .popup-title .close-btn {
+            cursor: pointer;
+            padding: 0 6px;
+            font-weight: bold;
+        }
+
+        .popup-title .close-btn:hover {
+            background: #ff0000;
+        }
+
+        .popup-body {
+            padding: 16px 20px 12px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .popup-body .icon-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .popup-body .icon-text .icon {
+            font-size: 32px;
+        }
+
+        .popup-body .btn-ok {
+            padding: 4px 40px;
+            background: #e0e0e0;
+            border: 2px solid #ffffff;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: '宋体', SimSun, serif;
+            transition: all 0.05s;
+            position: relative;
+        }
+
+        .popup-body .btn-ok:active {
+            border-color: #808080;
+            border-right-color: #ffffff;
+            border-bottom-color: #ffffff;
+        }
+
+        /* ===== 蓝屏样式 ===== */
+        .blue-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0000aa;
+            color: #ffffff;
+            font-family: 'Consolas', 'Lucida Console', monospace;
+            padding: 40px 30px;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .blue-screen .title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .blue-screen .error-code {
+            font-size: 16px;
+            margin: 10px 0;
+            color: #ffffaa;
+        }
+
+        .blue-screen .restart-timer {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #ffaa00;
+        }
+
+        .blue-screen .message {
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        /* ===== Excel 协议窗口 ===== */
+        .excel-window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ece9d8;
+            border: 3px solid #004080;
+            min-width: 400px;
+            min-height: 200px;
+            z-index: 500;
+            box-shadow: 8px 8px 20px rgba(0,0,0,0.6);
+            display: none;
+            font-family: '宋体', SimSun, serif;
+        }
+
+        .excel-window .window-title {
+            background: linear-gradient(to right, #004080, #1084d0);
+            color: white;
+            padding: 6px 12px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .excel-window .window-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .excel-window .agreement-text {
+            font-size: 13px;
+            line-height: 1.8;
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 10px;
+            background: white;
+            border: 1px solid #999;
+            width: 100%;
+        }
+
+        .excel-window .btn-next {
+            padding: 4px 32px;
+            background: #e0e0e0;
+            border: 2px solid #ffffff;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: '宋体', SimSun, serif;
+        }
+
+        .excel-window .btn-next:active {
+            border-color: #808080;
+            border-right-color: #ffffff;
+            border-bottom-color: #ffffff;
+        }
+
+        /* ===== CMD 窗口 ===== */
+        .cmd-window {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 500px;
+            height: 300px;
+            background: #000000;
+            color: #00ff00;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            border: 3px solid #c0c0c0;
+            z-index: 600;
+            display: none;
+            flex-direction: column;
+            box-shadow: 8px 8px 20px rgba(0,0,0,0.6);
+        }
+
+        .cmd-window .cmd-title {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 4px 10px;
+            display: flex;
+            justify-content: space-between;
+            cursor: default;
+        }
+
+        .cmd-window .cmd-body {
+            padding: 10px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cmd-window .cmd-output {
+            flex: 1;
+            white-space: pre-wrap;
+            line-height: 1.4;
+            min-height: 50px;
+        }
+
+        .cmd-window .cmd-input-line {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .cmd-window .cmd-input-line span {
+            color: #00ff00;
+        }
+
+        .cmd-window .cmd-input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            flex: 1;
+            outline: none;
+        }
+
+        .cmd-window .cmd-input::selection {
+            background: #00ff00;
+            color: #000000;
+        }
+
+       .running-apps {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-right: 10px;
+    flex: 1;
+}
+
+.running-app {
+    background: rgba(255,255,255,0.15);
+    padding: 2px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+} 
+
+.upload-bar-container {
+    width: 80px;
+    height: 14px;
+    background: #ddd;
+    border-radius: 7px;
+    overflow: hidden;
+    border: 1px solid #aaa;
+}
+
+.upload-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, #4caf50, #8bc34a);
+    transition: width 0.3s ease;
+    border-radius: 7px;
+}
+
+.desktop-icons {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 10;
+}
+
+.desktop-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 70px;
+    cursor: pointer;
+    padding: 8px 4px;
+    border-radius: 4px;
+    transition: background 0.1s;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    font-size: 12px;
+    text-align: center;
+}
+
+.desktop-icon:hover {
+    background: rgba(0, 100, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.desktop-icon .icon-img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+}
+
+.desktop-icon .icon-label {
+    font-size: 12px;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    word-wrap: break-word;
+    max-width: 70px;
+}
+
+/* ===== Excel 表格窗口 ===== */
+.excel-grid-window {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 640px;
+    height: 420px;
+    background: #ece9d8;
+    border: 3px solid #004080;
+    z-index: 500;
+    box-shadow: 8px 8px 20px rgba(0,0,0,0.6);
+    display: none;
+    flex-direction: column;
+    font-family: '宋体', SimSun, serif;
+}
+
+.excel-grid-window .window-title {
+    background: linear-gradient(to right, #004080, #1084d0);
+    color: white;
+    padding: 6px 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.excel-grid-body {
+    padding: 10px 16px 16px 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.excel-table-container {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #999;
+    background: white;
+}
+
+.excel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.excel-table th {
+    background: #d4d0c8;
+    border: 1px solid #999;
+    padding: 4px 8px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.excel-table td {
+    border: 1px solid #ccc;
+    padding: 3px 8px;
+    font-size: 12px;
+}
+
+.excel-table tr:nth-child(even) {
+    background: #f7f7f7;
+}
+
+.excel-input {
+    width: 100%;
+    border: 1px solid #ddd;
+    padding: 2px 4px;
+    font-size: 12px;
+    border-radius: 2px;
+    background: white;
+    box-sizing: border-box;
+}
+
+.excel-input:focus {
+    border-color: #004080;
+    outline: none;
+    background: #f0f7ff;
+}
+
+.excel-select {
+    width: 100%;
+    border: 1px solid #ddd;
+    padding: 2px 4px;
+    font-size: 12px;
+    border-radius: 2px;
+    background: white;
+}
+
+.excel-select:focus {
+    border-color: #004080;
+    outline: none;
+}
+
+.row-status {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.row-status.completed {
+    color: #2e7d32;
+}
+
+.excel-table tr[data-row] {
+    transition: background 0.2s;
+}
+
+.excel-table tr[data-row]:hover {
+    background: #e8f0fe !important;
+}
+
+.excel-table .highlight-row {
+    background: #fff3cd !important;
+}
+    </style>
+</head>
+<body>
+<div class="game-header">
+    <div class="game-title">🖥️ Windows XP 模拟器</div>
+    <div class="game-stats">
+        <div class="stat-item">
+            <span class="stat-icon">🔄</span>
+            <span class="stat-label">重试次数：</span>
+            <span class="stat-value" id="retryDisplay">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-icon">⏱️</span>
+            <span class="stat-label">用时：</span>
+            <span class="stat-value" id="timeDisplay">00:00</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-icon">📊</span>
+            <span class="stat-label">进度：</span>
+            <span class="stat-value" id="progressDisplay">0/35</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-icon">💻</span>
+            <span class="stat-label">CPU：</span>
+            <span class="stat-value" id="cpuDisplay">5%</span>
+        </div>
+<div class="stat-item" style="flex:1;min-width:100px;">
+    <span class="stat-icon">📤</span>
+    <div class="upload-bar-container">
+        <div class="upload-bar-fill" id="uploadBarFill" style="width:0%;"></div>
+    </div>
+    <span class="stat-value" id="uploadPercent" style="min-width:30px;font-size:12px;">0%</span>
+</div>
+<div class="stat-item">
+    <span class="stat-icon">🏆</span>
+    <span class="stat-label">最佳：</span>
+    <span class="stat-value" id="bestDisplay">--</span>
+</div>
+    </div>
+</div>
+
+ <div class="crt">
+        <!--桌面内容-->
+    <div class="desktop-icons">
+        <div class="desktop-icon" id="icon-excel">
+            <div class="icon-img">📊</div>
+            <span class="icon-label">Microsoft Excel</span>
+        </div>
+        <div class="desktop-icon" id="icon-ie">
+            <div class="icon-img">🌐</div>
+            <span class="icon-label">Internet Explorer</span>
+        </div>
+        <div class="desktop-icon" id="icon-cmd">
+            <div class="icon-img">💻</div>
+            <span class="icon-label">命令提示符</span>
+        </div>
+    </div>
+
+    <!-- ===== Excel 协议窗口 ===== -->
+    <div class="excel-window" id="excelWindow">
+        <div class="window-title">
+            <span>Microsoft Excel 用户协议</span>
+            <span style="cursor:pointer;" onclick="document.getElementById('excelWindow').style.display='none';">✕</span>
+        </div>
+        <div class="window-body">
+            <div class="agreement-text" id="agreementText">
+                请仔细阅读以下用户协议...<br>
+                第1条：本软件最终解释权归微软所有。<br>
+                第2条：您同意不使用本软件进行任何非法操作。<br>
+                第3条：...（此处省略1000字）<br>
+                第4条：您必须点击"下一步"继续。<br>
+                第5条：每次点击都代表您完全同意所有条款。<br>
+                （共需点击3次"下一步"）
+            </div>
+            <button class="btn-next" id="btnAgreeNext">下一步 →</button>
+            <span style="font-size:12px;color:#666;" id="agreementStep">步骤 1/3</span>
+        </div>
+    </div>
+
+    <!-- ===== CMD 窗口 ===== -->
+    <div class="cmd-window" id="cmdWindow">
+        <div class="cmd-title">
+            <span>命令提示符</span>
+            <span style="cursor:pointer;" id="cmdClose">✕</span>
+        </div>
+        <div class="cmd-body">
+            <div class="cmd-output" id="cmdOutput">
+Microsoft Windows XP [版本 5.1.2600]<br>
+(C) 版权所有 1985-2001 Microsoft Corp.<br><br>
+</div>
+            <div class="cmd-input-line">
+                <span>C:\&gt;</span>
+                <input type="text" class="cmd-input" id="cmdInput" autofocus>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 蓝屏 ===== -->
+    <div class="blue-screen" id="blueScreen">
+        <div class="title">⚠️ 系统崩溃</div>
+        <div class="error-code">STOP: 0x0000007B (0xF78D2524, 0xC0000034, 0x00000000, 0x00000000)</div>
+        <div class="message">
+            <strong>信使服务</strong> 导致系统资源耗尽。<br>
+            请尝试以下操作：<br>
+            • 关闭所有弹窗<br>
+            • 按 Ctrl+Alt+Del 重启<br>
+            • 联系系统管理员<br><br>
+            <span style="color:#ffffaa;">物理内存转储完成。请联系技术支持。</span>
+        </div>
+        <div class="restart-timer" id="restartTimer">30</div>
+        <div style="font-size:14px;">系统将在 <span id="restartSeconds">30</span> 秒后自动重启...</div>
+    </div>
+
+<!--任务栏-->
+<div class="taskbar">
+    <div class="start-btn" id="start-btn">
+        <span class="win-logo">
+            <span class="block red"></span>
+            <span class="block green"></span>
+            <span class="block blue"></span>
+            <span class="block yellow"></span>
+        </span>
+        开始
+    </div>
+    <div class="taskbar-center">
+        <div class="running-apps" id="runningApps"></div>
+        <div class="cpu-indicator">
+            <span>CPU</span>
+            <div class="cpu-bar">
+                <div class="cpu-fill" id="cpuFill" style="width:5%;"></div>
+            </div>
+            <span id="cpuText">5%</span>
+        </div>
+    </div>
+    <div class="clock" id="clockDisplay"></div>
+</div>
+
+<!-- ===== Excel 表格窗口 ===== -->
+<div class="excel-grid-window" id="excelGridWindow">
+    <div class="window-title">
+        <span>📊 Microsoft Excel - 数据录入</span>
+        <span style="cursor:pointer;" onclick="document.getElementById('excelGridWindow').style.display='none'; state.excelGridOpen = false;">✕</span> 
+    </div>
+    <div class="excel-grid-body">
+        <div style="display:flex;gap:10px;margin-bottom:8px;font-size:13px;color:#333;">
+            <span>📝 已录入: <span id="excelRowCount">0</span>/35 行</span>
+            <span style="color:#999;">|</span>
+            <span id="excelStatus">⏳ 请填写数据...</span>
+        </div>
+        <div class="excel-table-container">
+            <table class="excel-table" id="excelTable">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">#</th>
+                        <th style="width:100px;">姓名</th>
+                        <th style="width:100px;">部门</th>
+                        <th style="width:90px;">销售额(万)</th>
+                        <th style="width:80px;">状态</th>
+                    </tr>
+                </thead>
+                <tbody id="excelTableBody">
+                    <!-- JS动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#666;display:flex;justify-content:space-between;">
+            <span>⚡ 填到第20行时触发"信使服务"弹窗</span>
+            <span id="excelProgressText">0%</span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 底部信息栏 ===== -->
+<div class="game-footer">
+    <div class="hint">
+        <span>📌 双击桌面图标运行</span>
+        <span>💡 第20行触发弹窗</span>
+        <span>🏆 CMD删病毒隐藏路线</span>
+    </div>
+    <div class="credit">🖥️ Windows XP 鬼畜挑战 v1.0</div>
+</div>
+
+
+    <script>
+// 1. 基础状态管理
+const state = {
+    // 任务流程
+    excelOpened: false,
+    agreementStep: 0,          // 0-3, 3表示已同意
+    excelReady: false,
+    ieOpened: false,
+    rowCount: 0,               // 已填表格行数
+    isFilling: false,
+   isUploading: false, 
+    // 弹窗系统
+    popups: [],
+    popupCount: 0,
+    cpu: 5,                    // 5-100
+    isPopupAttack: false,
+    popupTimer: null,
+    attackTriggered: false,    // 防止重复触发
+    
+    // 蓝屏状态
+    isBlueScreen: false,
+    restartCountdown: 30,
+    restartTimer: null,
+    
+    // CMD路线
+    cmdOpen: false,
+    isVirusDeleted: false,     // 是否已删除 messenger.exe
+    
+    // 统计数据
+    retryCount: parseInt(localStorage.getItem('xpRetryCount')) || 0,
+    startTime: null,
+    endTime: null,
+    isCompleted: false,
+    
+    // 游戏状态
+    isPaused: false,           // 蓝屏时暂停弹窗
+    excelGridOpen: false,
+};
+
+// 2. 时钟功能
+//  时钟功能：显示系统时间，每分钟自动更新
+const clockElement = document.getElementById('clockDisplay');// 获取显示时间的元素（通过 id 找到它）
+
+// 定义更新时钟的函数
+function updateClock() {
+    // 1. 获取当前系统时间
+    const now = new Date();  // new Date() 会获取电脑的当前时间
+    // 2. 提取小时和分钟
+    const hours = now.getHours();     // 获取小时（0-23）
+    const minutes = now.getMinutes(); // 获取分钟（0-59）
+    // 3. 格式化：保证两位数（比如 08:05，而不是 8:5）
+    const hoursStr = String(hours).padStart(2, '0');     // 如果是一位数，前面补0
+    const minutesStr = String(minutes).padStart(2, '0'); // 同上 
+    // 4. 组合成 "HH:MM" 格式
+    const timeString = hoursStr + ':' + minutesStr; 
+    // 5. 把时间显示到页面上
+    clockElement.textContent = timeString;
+}
+
+// 立即执行一次，让页面打开时就有时间（不用等1分钟）
+updateClock();
+
+// 设置定时器：每30秒更新一次（老机器不需要太精确，30秒足够）
+setInterval(updateClock, 30000);  // 30000 毫秒 = 30 秒
+
+// 3. CPU 更新
+function updateCPU() {
+    const fill = document.getElementById('cpuFill');
+    const text = document.getElementById('cpuText');
+    const cpu = Math.min(100, Math.max(0, state.cpu));
+    fill.style.width = cpu + '%';
+    text.textContent = Math.round(cpu) + '%';
+    
+    // CPU 颜色变化
+    if (cpu > 80) {
+        fill.style.background = 'linear-gradient(to right, #ff6b6b, #ff0000)';
+    } else if (cpu > 50) {
+        fill.style.background = 'linear-gradient(to right, #ffeb3b, #ff9800)';
+    } else {
+        fill.style.background = 'linear-gradient(to right, #4caf50, #8bc34a)';
+    }
+     document.getElementById('cpuDisplay').textContent = Math.round(state.cpu) + '%';
+}
+
+// 4. 弹窗系统
+function createPopup(baseOffsetX = 0, baseOffsetY = 0) {
+playBeep(600 + Math.random() * 400, 100);
+
+    if (state.isBlueScreen || state.isVirusDeleted) return;
+    
+    const popup = document.createElement('div');
+    popup.className = 'messenger-popup';
+    
+    // 随机位置，避免重叠
+    const left = 50 + Math.random() * 400 +baseOffsetX ;
+    const top = 50 + Math.random() * 300 +  baseOffsetY;
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+    
+    // 随机标题（信使服务风格）
+    const titles = [
+        '信使服务', 'Messenger Service', '系统警告', 
+        'Microsoft Windows', '网络消息', '管理员通知'
+    ];
+    const title = titles[Math.floor(Math.random() * titles.length)];
+    // 随机消息
+    const messages = [
+        '⚠️ 系统资源不足，请关闭不必要的程序。',
+        '📢 网络管理员：请勿在工作时间玩游戏。',
+        '💀 检测到非法操作，请联系技术支持。',
+        '🔄 系统将在 5 分钟后自动重启。',
+        '📧 您有新的邮件在 C:\\ 根目录。',
+        '🔥 CPU 温度过高，请检查散热。',
+        '🎯 恭喜！您中奖了！请点击确定领取。',
+        '👻 信使服务：你跑不掉的...',
+        '📊 Excel 正在后台收集数据。',
+        '⚡ 电压不稳定，建议保存工作。'
+    ];
+    const msg = messages[Math.floor(Math.random() * messages.length)];
+    
+// 彩蛋：2%概率出现"微软技术支持"弹窗
+const isEasterEgg = Math.random() < 0.02;
+
+if (isEasterEgg) {
+    popup.innerHTML = `
+        <div class="popup-title" style="background: linear-gradient(to right, #004080, #0060c0);">
+            <span>🛡️ 微软技术支持</span>
+            <span class="close-btn" onclick="closePopup(this)">✕</span>
+        </div>
+        <div class="popup-body">
+            <div class="icon-text">
+                <span class="icon">🛡️</span>
+                <span>✅ 检测到恶意弹窗攻击！\n微软技术支持已介入。</span>
+            </div>
+<button class="btn-ok" onclick="activateEasterEgg(this)" 
+        style="background:#004080;color:white;border-color:#0060c0;padding:6px 40px;transform: translate(${(Math.random()-0.5)*10}px, ${(Math.random()-0.5)*10}px);">
+    立即修复
+</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    state.popups.push(popup);
+    state.popupCount++;
+    state.cpu += 3; // 比普通弹窗少加CPU
+    updateCPU();
+    return;
+}
+
+const cpuLevel = Math.min(100, state.cpu);
+const maxOffset = 5 + (cpuLevel / 100) * 20;
+const btnOffsetX = (Math.random() - 0.5) * maxOffset * 2;
+const btnOffsetY = (Math.random() - 0.5) * maxOffset * 2;
+
+    // 构建弹窗HTML
+    popup.innerHTML = `
+        <div class="popup-title">
+            <span>${title}</span>
+            <span class="close-btn" onclick="closePopup(this)">✕</span>
+        </div>
+        <div class="popup-body">
+            <div class="icon-text">
+                <span class="icon">${['💬','⚠️','📢','💀','📧','🔥','🎯','👻','📊','⚡'][Math.floor(Math.random()*10)]}</span>
+                <span>${msg}</span>
+            </div>
+            <button class="btn-ok" onclick="closePopup(this)" 
+        style="transform: translate(${btnOffsetX}px, ${btnOffsetY}px); transition: transform 0.05s;">
+    确定
+</button>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+    state.popups.push(popup);
+    state.popupCount++;
+    state.cpu += 6; // 每个弹窗增加6% CPU
+    updateCPU();
+    
+    // 弹窗数量过多时触发蓝屏检查
+    checkBlueScreenCondition();
+}
+
+function closePopup(element) {
+    // 找到弹窗容器
+    const popup = element.closest('.messenger-popup');
+    if (!popup) return;
+    
+    // 移除弹窗
+    const index = state.popups.indexOf(popup);
+    if (index !== -1) {
+        state.popups.splice(index, 1);
+    }
+    popup.remove();
+    state.popupCount--;
+    state.cpu = Math.max(5, state.cpu - 6); // 关闭弹窗减少CPU
+    updateCPU();
+    
+    // 检查是否所有弹窗都已清除
+    if (state.popups.length === 0 && state.isPopupAttack) {
+        state.isPopupAttack = false;
+        if (state.popupTimer) {
+            clearInterval(state.popupTimer);
+            state.popupTimer = null;
+        }
+        // 恢复正常
+        state.cpu = Math.max(5, state.cpu - 10);
+        updateCPU();
+    }
+}
+
+function startPopupAttack() {
+    if (state.isPopupAttack || state.isVirusDeleted || state.isBlueScreen) return;
+    
+    state.isPopupAttack = true;
+    state.attackTriggered = true;
+    
+    // 初始弹幕：一次性弹出5个
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => createPopup(i * 20, i * 15), i * 200);
+    }
+    
+    // 持续施压：每8秒检查并补充
+    state.popupTimer = setInterval(() => {
+        if (state.isBlueScreen || state.isVirusDeleted) {
+            clearInterval(state.popupTimer);
+            return;
+        }
+        
+        if (state.popups.length > 0 && state.popups.length < 30) {
+            // 补充1-2个
+            const count = 1 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => createPopup(Math.random() * 60 - 30, Math.random() * 40 - 20), i * 150);
+            }
+        }
+        
+        checkBlueScreenCondition();
+    }, 8000);
+}
+
+function checkBlueScreenCondition() {
+    // 触发蓝屏条件
+    if (state.isBlueScreen) return;
+    if (state.isVirusDeleted) return;
+    
+    const cpu = state.cpu;
+    const popups = state.popups.length;
+    
+    // 高概率触发蓝屏
+    if (popups >= 30 || cpu >= 90) {
+        triggerBlueScreen();
+        return;
+    }
+    
+    // 随机触发（增加不确定性）
+    if (popups >= 20 && cpu >= 70 && Math.random() < 0.05) {
+        triggerBlueScreen();
+    }
+}
+
+// 5. 蓝屏系统
+function triggerBlueScreen() {
+playBeep(200, 2000, 'sawtooth');
+
+    if (state.isBlueScreen) return;
+    state.isBlueScreen = true;
+    state.isPaused = true;
+    
+    // 清除所有弹窗
+    state.popups.forEach(p => p.remove());
+    state.popups = [];
+    state.popupCount = 0;
+    if (state.popupTimer) {
+        clearInterval(state.popupTimer);
+        state.popupTimer = null;
+    }
+    document.getElementById('excelGridWindow').style.display = 'none';
+    // 显示蓝屏
+    const blueScreen = document.getElementById('blueScreen');
+    blueScreen.style.display = 'flex';
+    
+    // 启动倒计时
+    state.restartCountdown = 30;
+    updateRestartTimer();
+    state.restartTimer = setInterval(() => {
+        state.restartCountdown--;
+        updateRestartTimer();
+        if (state.restartCountdown <= 0) {
+            clearInterval(state.restartTimer);
+            restartSystem();
+        }
+    }, 1000);
+}
+
+function updateRestartTimer() {
+    document.getElementById('restartSeconds').textContent = state.restartCountdown;
+    document.getElementById('restartTimer').textContent = state.restartCountdown;
+}
+
+function restartSystem() {
+    // 增加重试次数
+    state.retryCount++;
+    localStorage.setItem('xpRetryCount', state.retryCount);
+    
+    // 重置所有状态
+    state.isBlueScreen = false;
+    state.isPaused = false;
+    state.cpu = 5;
+    state.popups = [];
+    state.popupCount = 0;
+    state.isPopupAttack = false;
+    state.attackTriggered = false;
+    state.excelOpened = false;
+    state.agreementStep = 0;
+    state.excelReady = false;
+    state.rowCount = 0;
+    state.isFilling = false;
+    state.isVirusDeleted = false;
+    state.isCompleted = false;
+    state.startTime = null;
+    state.endTime = null;
+    
+    if (state.popupTimer) {
+        clearInterval(state.popupTimer);
+        state.popupTimer = null;
+    }
+    
+    // 隐藏蓝屏
+    document.getElementById('blueScreen').style.display = 'none';
+    
+    // 关闭所有弹窗
+    document.querySelectorAll('.messenger-popup').forEach(p => p.remove());
+    
+    // 关闭Excel和CMD
+    document.getElementById('excelWindow').style.display = 'none';
+    document.getElementById('cmdWindow').style.display = 'none';
+    document.getElementById('excelGridWindow').style.display = 'none';
+document.getElementById('excelTableBody').innerHTML = '';
+state.excelGridOpen = false;
+    // 重置CPU显示
+    updateCPU();
+    updateStats();
+    
+    // 显示重启提示（简单alert模拟）
+    alert(`💻 系统已重启\n\n已尝试次数: ${state.retryCount}\n\n提示：可以尝试在CMD中删除 messenger.exe`);
+}
+
+// 6. Excel 打开流程（3次下一步）
+function openExcel() {
+    if (state.excelOpened) return;
+    if (state.isBlueScreen) return;
+    
+    state.excelOpened = true;
+    const window = document.getElementById('excelWindow');
+    window.style.display = 'block';
+    state.agreementStep = 0;
+    document.getElementById('agreementStep').textContent = '步骤 1/3';
+    
+    // 记录开始时间
+    if (!state.startTime) {
+        state.startTime = Date.now();
+    }
+}
+
+// 显示可编辑的Excel表格
+function showExcelGrid() {
+    const gridWindow = document.getElementById('excelGridWindow');
+    gridWindow.style.display = 'flex';
+    state.excelGridOpen = true;
+    
+    const tbody = document.getElementById('excelTableBody');
+    tbody.innerHTML = '';
+    
+    // 生成35行空表格，每行都有输入框
+    for (let i = 1; i <= 35; i++) {
+        const tr = document.createElement('tr');
+        tr.dataset.row = i;
+        tr.innerHTML = `
+            <td style="text-align:center;font-weight:bold;">${i}</td>
+            <td><input type="text" class="excel-input" data-row="${i}" data-col="name" placeholder="姓名"></td>
+            <td>
+                <select class="excel-select" data-row="${i}" data-col="dept">
+                    <option value="">请选择</option>
+                    <option value="销售部">销售部</option>
+                    <option value="技术部">技术部</option>
+                    <option value="市场部">市场部</option>
+                    <option value="人事部">人事部</option>
+                    <option value="财务部">财务部</option>
+                    <option value="研发部">研发部</option>
+                    <option value="运营部">运营部</option>
+                    <option value="产品部">产品部</option>
+                </select>
+            </td>
+            <td><input type="number" class="excel-input" data-row="${i}" data-col="sales" placeholder="0" min="0" step="0.1"></td>
+            <td class="row-status" id="status-${i}">⏳ 待填写</td>
+        `;
+        tbody.appendChild(tr);
+    }
+    
+    // 更新进度
+    updateExcelProgress();
+    
+    // 监听输入变化
+    document.querySelectorAll('.excel-input, .excel-select').forEach(el => {
+        el.addEventListener('input', function() {
+            checkRowComplete(this.dataset.row);
+        });
+        el.addEventListener('change', function() {
+            checkRowComplete(this.dataset.row);
+        });
+    });
+}
+
+// 检查某行是否填写完整
+function checkRowComplete(rowNum) {
+    const tr = document.querySelector(`#excelTableBody tr[data-row="${rowNum}"]`);
+    if (!tr) return;
+    
+    const name = tr.querySelector('[data-col="name"]').value.trim();
+    const dept = tr.querySelector('[data-col="dept"]').value;
+    const sales = tr.querySelector('[data-col="sales"]').value.trim();
+    
+    const statusCell = document.getElementById(`status-${rowNum}`);
+    
+    if (name && dept && sales && parseFloat(sales) > 0) {
+        statusCell.textContent = '✅ 已填写';
+        statusCell.className = 'row-status completed';
+        // 检查是否所有行都填完了
+        checkAllRowsComplete();
+    } else {
+        statusCell.textContent = '⏳ 待填写';
+        statusCell.className = 'row-status';
+    }
+    
+    updateExcelProgress();
+}
+
+// 检查所有行是否都填完了
+function checkAllRowsComplete() {
+    let completed = 0;
+    for (let i = 1; i <= 35; i++) {
+        const status = document.getElementById(`status-${i}`);
+        if (status && status.textContent === '✅ 已填写') {
+            completed++;
+        }
+    }
+    
+    // 如果全部填完，触发上传
+    if (completed === 35) {
+        document.getElementById('excelStatus').textContent = '🎉 所有数据已填写完毕！';
+        // 延迟一点触发上传
+        setTimeout(() => {
+            if (!state.isCompleted && !state.isUploading) {
+                state.rowCount = 35;
+                state.isCompleted = true;
+                state.endTime = Date.now();
+                showUploadProgress();
+            }
+        }, 500);
+    }
+}
+
+// 更新Excel进度
+function updateExcelProgress() {
+    let filled = 0;
+    for (let i = 1; i <= 35; i++) {
+        const status = document.getElementById(`status-${i}`);
+        if (status && status.textContent === '✅ 已填写') {
+            filled++;
+        }
+    }
+    document.getElementById('excelRowCount').textContent = filled;
+    document.getElementById('progressDisplay').textContent = `${filled}/35`;
+    document.getElementById('excelProgressText').textContent = `${Math.round(filled/35*100)}%`;
+    state.rowCount = filled;
+    
+    // 检查是否触发弹窗攻击（填到第20行时）
+    if (filled >= 20 && !state.attackTriggered && !state.isVirusDeleted) {
+        startPopupAttack();
+        if (filled === 20) {
+            document.getElementById('excelStatus').textContent = '💣 已触发弹窗攻击！';
+            alert('💣 触发了"信使服务"弹窗攻击！\n\n快速关闭弹窗，或尝试在CMD中删除 messenger.exe');
+        }
+    }
+    if (filled > 20 && state.attackTriggered) {
+        document.getElementById('excelStatus').textContent = '⚠️ 弹窗攻击中... 继续填写';
+    }
+    if (filled >= 20 && state.isVirusDeleted) {
+        document.getElementById('excelStatus').textContent = '✅ 病毒已删除，安全填写中...';
+    }
+}
+
+document.getElementById('btnAgreeNext').addEventListener('click', function() {
+    if (state.isBlueScreen) return;
+    
+    state.agreementStep++;
+    const step = state.agreementStep;
+    
+    if (step >= 3) {
+    document.getElementById('excelWindow').style.display = 'none';
+    state.excelReady = true;
+    // 显示可编辑的Excel表格
+    showExcelGrid();
+    alert('✅ Excel 已打开！\n请在表格中填写数据（共需填35行）\n\n⚠️ 注意：填到第20行时会触发"信使服务"弹窗！');
+} else {
+        document.getElementById('agreementStep').textContent = `步骤 ${step + 1}/3`;
+        // 改变协议文本
+        const texts = [
+            '步骤 2/3：您确认已阅读并理解所有条款。\n点击"下一步"表示您接受这些条款。',
+            '步骤 3/3：最后确认！\n您同意将您的数据用于统计分析。\n点击"下一步"完成协议。'
+        ];
+        document.getElementById('agreementText').textContent = texts[step - 1];
+    }
+});
+
+// 8. CMD 删除路线
+document.getElementById('icon-cmd').addEventListener('dblclick', function() {
+    openCMD();
+});
+
+// 也支持单击
+document.getElementById('icon-cmd').addEventListener('click', function() {
+    openCMD();
+});
+
+function openCMD() {
+    if (state.isBlueScreen) return;
+    if (state.cmdOpen) {
+        document.getElementById('cmdWindow').style.display = 'block';
+        document.getElementById('cmdInput').focus();
+        return;
+    }
+    
+    state.cmdOpen = true;
+    const cmd = document.getElementById('cmdWindow');
+    cmd.style.display = 'flex';
+    document.getElementById('cmdInput').focus();
+}
+
+document.getElementById('cmdClose').addEventListener('click', function() {
+    document.getElementById('cmdWindow').style.display = 'none';
+});
+
+// CMD 输入处理
+document.getElementById('cmdInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const input = this.value.trim();
+        const output = document.getElementById('cmdOutput');
+        
+        // 显示输入的命令
+        output.innerHTML += `C:\\>${input}\n`;
+        
+        // 处理命令
+        const lowerInput = input.toLowerCase();
+        let response = '';
+        
+     if (lowerInput.includes('del') && lowerInput.includes('messenger.exe')) {
+    // 删除病毒！
+    if (!state.isVirusDeleted) {
+        state.isVirusDeleted = true;
+        response = '✅ 已删除 messenger.exe\n系统恢复正常！\n\n🏆 你找到了隐藏路线！\n所有弹窗攻击已停止。';
+        
+        // 清除所有弹窗
+        state.popups.forEach(p => p.remove());
+        state.popups = [];
+        state.popupCount = 0;
+        state.isPopupAttack = false;
+        state.attackTriggered = false;
+        state.cpu = 5;
+        updateCPU();
+        if (state.popupTimer) {
+            clearInterval(state.popupTimer);
+            state.popupTimer = null;
+        }
+        
+        // 如果表格还没显示，显示它
+        if (!state.excelGridOpen && !state.isCompleted) {
+            showExcelGrid();
+        }
+    } else {
+        response = '⚠️ messenger.exe 已被删除。';
+    }
+} else if (lowerInput.includes('taskkill') && lowerInput.includes('messenger')) {
+    // 终止进程
+    if (!state.isVirusDeleted) {
+        state.isVirusDeleted = true;
+        response = '✅ 已终止 messenger.exe 进程\n系统恢复正常！\n\n🏆 你找到了隐藏路线！\n所有弹窗攻击已停止。';
+        
+        // 清除所有弹窗
+        state.popups.forEach(p => p.remove());
+        state.popups = [];
+        state.popupCount = 0;
+        state.isPopupAttack = false;
+        state.attackTriggered = false;
+        state.cpu = 5;
+        updateCPU();
+        if (state.popupTimer) {
+            clearInterval(state.popupTimer);
+            state.popupTimer = null;
+        }
+        
+        // 如果表格还没显示，显示它
+        if (!state.excelGridOpen && !state.isCompleted) {
+            showExcelGrid();
+        }
+    } else {
+        response = '⚠️ messenger.exe 已被终止。';
+    }
+} else if (lowerInput === 'cls' || lowerInput === 'clear') {
+    output.innerHTML = 'Microsoft Windows XP [版本 5.1.2600]\n(C) 版权所有 1985-2001 Microsoft Corp.\n\n';
+    this.value = '';
+    return;
+} else if (lowerInput === 'dir') {
+    response = ' 驱动器 C 中的卷没有标签。\n 卷序列号: 1234-5678\n\n C:\\ 的目录\n\n 2006-07-16  14:30    <DIR>          WINDOWS\n 2006-07-16  14:25    <DIR>          Program Files\n 2006-07-16  14:20             1,024  messenger.exe  ← ⚠️ 病毒文件\n 2006-07-16  14:15    <DIR>          Documents and Settings\n 2006-07-16  14:10    <DIR>          My Documents\n               1 个文件          1,024 字节\n               4 个目录  可用空间 10.2 GB';
+} else if (lowerInput === 'help') {
+    response = '可用命令：\n  dir      - 显示目录内容\n  cls      - 清屏\n  del      - 删除文件 (例如: del messenger.exe)\n  taskkill - 终止进程\n  exit     - 关闭CMD';
+} else if (lowerInput === 'exit') {
+    document.getElementById('cmdWindow').style.display = 'none';
+    this.value = '';
+    return;
+} else if (input === '') {
+    response = '';
+} else {
+    response = `'${input}' 不是内部或外部命令，也不是可运行的程序或批处理文件。`;
+}
+
+if (response) {
+    output.innerHTML += response + '\n\n';
+}
+        
+        // 滚动到底部
+        output.scrollTop = output.scrollHeight;
+        this.value = '';
+    }
+;})
+
+// 9. 桌面图标事件
+document.getElementById('icon-ie').addEventListener('dblclick', function() {
+    if (state.isBlueScreen) return;
+    if (state.ieOpened) {
+        alert('🌐 IE已打开，正在搜索...');
+        return;
+    }
+    state.ieOpened = true;
+    
+    // 模拟搜索过程
+    const searchTerms = [
+        'Windows XP 信使服务 漏洞',
+        '信使服务 弹窗攻击 历史',
+        '如何禁用 Windows XP 信使服务',
+        'netsend 命令 使用方法',
+        'Windows XP 系统安全 补丁'
+    ];
+    
+    let resultIndex = 0;
+    const searchInterval = setInterval(() => {
+        if (resultIndex >= searchTerms.length || state.isBlueScreen) {
+            clearInterval(searchInterval);
+            if (!state.isBlueScreen) {
+                alert(`🌐 搜索完成！\n\n📄 搜索结果（共5条）：\n${searchTerms.map((t, i) => `${i+1}. ${t}`).join('\n')}\n\n💡 提示：找到关键信息"messenger.exe"是信使服务核心文件`);
+            }
+            return;
+        }
+        // 模拟搜索进度
+        console.log(`🔍 正在搜索: ${searchTerms[resultIndex]}`);
+        resultIndex++;
+    }, 800);
+});
+
+
+document.getElementById('icon-excel').addEventListener('click', function(e) {
+    if (this._clickTimer) clearTimeout(this._clickTimer);
+    this._clickTimer = setTimeout(() => {
+        if (!state.excelOpened) openExcel();
+    }, 300);
+});
+
+document.getElementById('icon-excel').addEventListener('dblclick', function() {
+    if (this._clickTimer) clearTimeout(this._clickTimer);
+    openExcel();
+});
+
+// 10. 开始菜单
+document.getElementById('startBtn').addEventListener('click', function() {
+    alert('🪟 开始菜单\n\n📊 Excel (双击桌面图标)\n🌐 Internet Explorer (双击桌面图标)\n💻 命令提示符 (双击桌面图标)\n\n📊 任务状态: ' + 
+          (state.excelReady ? 'Excel已就绪' : '未打开Excel') + '\n' +
+          '📝 已填行数: ' + state.rowCount + '/35\n' +
+          '💬 弹窗数量: ' + state.popups.length + '\n' +
+          '💻 CPU: ' + Math.round(state.cpu) + '%\n' +
+          (state.isVirusDeleted ? '🏆 病毒已删除！' : '') +
+          (state.isCompleted ? '\n🎉 任务完成！' : ''));
+});
+
+// 11. 键盘快捷键
+document.addEventListener('keydown', function(e) {
+    // Ctrl+Alt+Del 模拟重启（蓝屏时）
+    if (e.ctrlKey && e.altKey && e.key === 'Delete') {
+        if (state.isBlueScreen) {
+            clearInterval(state.restartTimer);
+            restartSystem();
+        }
+    }
+    
+    // Alt+F4 关闭弹窗（作弊小技巧）
+    if (e.altKey && e.key === 'F4') {
+        if (state.popups.length > 0) {
+            const last = state.popups[state.popups.length - 1];
+            if (last) {
+                const btn = last.querySelector('.btn-ok');
+                if (btn) btn.click();
+            }
+            e.preventDefault();
+        }
+    }
+});
+// 12. 顶部统计信息更新
+function updateStats() {
+    // 更新重试次数
+    document.getElementById('retryDisplay').textContent = state.retryCount;
+    
+    // 更新CPU
+    document.getElementById('cpuDisplay').textContent = Math.round(state.cpu) + '%';
+    
+    // 更新用时
+    if (state.startTime && !state.isCompleted) {
+        const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+        const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const seconds = String(elapsed % 60).padStart(2, '0');
+        document.getElementById('timeDisplay').textContent = `${minutes}:${seconds}`;
+    } else if (state.isCompleted && state.endTime) {
+        const elapsed = Math.floor((state.endTime - state.startTime) / 1000);
+        const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const seconds = String(elapsed % 60).padStart(2, '0');
+        document.getElementById('timeDisplay').textContent = `${minutes}:${seconds}`;
+    }
+// 更新进度（只在非上传状态更新）
+if (!state.isUploading) {
+    document.getElementById('progressDisplay').textContent = `${state.rowCount}/35`;
+    document.getElementById('uploadBarFill').style.width = '0%';
+    document.getElementById('uploadPercent').textContent = '0%';
+}
+     // 更新最佳记录
+    const history = JSON.parse(localStorage.getItem('xpHistory')) || [];
+    if (history.length > 0) {
+        const best = history[0];
+        document.getElementById('bestDisplay').textContent = `${best.time}s`;
+    } else {
+        document.getElementById('bestDisplay').textContent = '--';
+    }
+    updateRunningApps();
+}
+
+// 每秒更新统计信息
+setInterval(updateStats, 1000);
+
+// 上传进度
+function showUploadProgress() {
+    state.isUploading = true;
+    let progress = 0;
+    const uploadInterval = setInterval(() => {
+        progress += 5;
+        document.getElementById('progressDisplay').textContent = `📤 ${progress}%`;
+        document.getElementById('uploadBarFill').style.width = progress + '%';
+        document.getElementById('uploadPercent').textContent = progress + '%';
+        if (progress >= 100) {
+            clearInterval(uploadInterval);
+            state.isCompleted = true;
+            state.endTime = Date.now();
+            
+            const totalTime = ((state.endTime - state.startTime) / 1000).toFixed(1);
+            
+            // 保存记录到localStorage
+            const record = {
+                time: totalTime,
+                retries: state.retryCount,
+                method: state.isVirusDeleted ? 'CMD删除' : '硬扛弹窗',
+                date: new Date().toLocaleString()
+            };
+            
+            // 获取历史记录
+            let history = JSON.parse(localStorage.getItem('xpHistory')) || [];
+            history.push(record);
+            // 按用时排序（最快在前）
+            history.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
+            // 只保留前10条
+            if (history.length > 10) history = history.slice(0, 10);
+            localStorage.setItem('xpHistory', JSON.stringify(history));
+            
+            // 更新显示
+            updateStats();
+            updateLeaderboard();
+            const leaderboardMsg = window.leaderboardData || '';
+            alert(`🎉 上传成功！\n\n✅ 共上传 35 行数据到服务器\n⏱️ 用时: ${totalTime} 秒\n🔄 重试次数: ${state.retryCount}\n🏆 ${state.isVirusDeleted ? '使用CMD删除病毒！' : '硬扛弹窗攻击！'}\n\n📊 已保存到历史记录\n\n${leaderboardMsg}`);
+            
+document.getElementById('progressDisplay').textContent = `✅ 35/35`;
+            state.isUploading = false;
+        }
+    }, 100);
+}
+
+// 彩蛋激活
+function activateEasterEgg(element) {
+    const popup = element.closest('.messenger-popup');
+    if (popup) {
+        popup.remove();
+        const index = state.popups.indexOf(popup);
+        if (index !== -1) state.popups.splice(index, 1);
+        state.popupCount--;
+    }
+    
+    // 清除所有弹窗
+    state.popups.forEach(p => p.remove());
+    state.popups = [];
+    state.popupCount = 0;
+    state.isPopupAttack = false;
+    state.attackTriggered = false;
+    state.cpu = 20; // 恢复到20%
+    updateCPU();
+    
+    if (state.popupTimer) {
+        clearInterval(state.popupTimer);
+        state.popupTimer = null;
+    }
+    
+    alert('🛡️ 微软技术支持已清理所有弹窗！\n\n💡 提示：这只是个彩蛋，下次可能不会再出现了。');
+}
+
+// 鼠标移动卡顿
+let mouseLagTimer = null;
+document.addEventListener('mousemove', function(e) {
+    if (state.cpu > 70 && !state.isBlueScreen) {
+        // 卡顿效果：延迟更新鼠标位置
+        if (mouseLagTimer) clearTimeout(mouseLagTimer);
+        mouseLagTimer = setTimeout(() => {
+            // 模拟卡顿，不做实际移动，只增加视觉延迟感
+        }, 100 + (state.cpu - 70) * 5);
+    }
+});
+
+// 任务栏CPU指示器闪烁（CPU > 80%时）
+setInterval(() => {
+    if (state.cpu > 80 && !state.isBlueScreen) {
+        const cpuText = document.getElementById('cpuText');
+        cpuText.style.color = cpuText.style.color === '#ff0000' ? '#ff6666' : '#ff0000';
+    } else {
+        document.getElementById('cpuText').style.color = '#7fdbff';
+    }
+}, 500);
+
+// 音效系统
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new AudioContext();
+    }
+}
+
+function playBeep(frequency = 800, duration = 150, type = 'square') {
+    try {
+        initAudio();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.type = type;
+        oscillator.frequency.value = frequency;
+        gainNode.gain.value = 0.3;
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.start();
+        setTimeout(() => {
+            oscillator.stop();
+        }, duration);
+    } catch(e) {
+        // 静默失败
+    }
+}
+
+function updateRunningApps() {
+    const container = document.getElementById('runningApps');
+    if (!container) return;
+    
+    let apps = [];
+    if (state.excelReady || state.excelGridOpen) apps.push('📊 Excel');
+    if (state.ieOpened) apps.push('🌐 IE');
+    if (state.cmdOpen) apps.push('💻 CMD');
+    
+    if (apps.length === 0) {
+        container.innerHTML = '<span style="color:rgba(255,255,255,0.4);font-size:11px;">就绪</span>';
+        return;
+    }
+    
+    container.innerHTML = apps.map(app => 
+        `<span class="running-app">${app}</span>`
+    ).join('');
+}
+
+// 排行榜显示
+function updateLeaderboard() {
+    const history = JSON.parse(localStorage.getItem('xpHistory')) || [];
+    if (history.length === 0) return;
+    
+    let message = '🏆 历史排行榜 (前10名)\n' + '═'.repeat(30) + '\n';
+    history.forEach((record, index) => {
+        const medal = ['🥇', '🥈', '🥉'][index] || `${index+1}.`;
+        message += `${medal} ${record.time}s  |  ${record.method}  |  ${record.date}\n`;
+    });
+    
+    // 保存到全局变量供显示
+    window.leaderboardData = message;
+}
+
+    </script>
+</body>
+</html>
