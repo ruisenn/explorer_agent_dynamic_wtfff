@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.agent import AgentRunner
 
@@ -19,6 +20,7 @@ from src.agent import AgentRunner
 ROOT_DIR = Path(__file__).resolve().parent
 RUNTIME_DIR = ROOT_DIR / "runtime"
 FIXTURE_DIR = ROOT_DIR / "fixtures"
+WINDOWS_XP_DEMO_DIR = ROOT_DIR / "windowsXP-simulation"
 
 load_dotenv(ROOT_DIR / ".env")
 
@@ -155,6 +157,11 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type"],
 )
+app.mount(
+    "/windowsXP-simulation",
+    StaticFiles(directory=WINDOWS_XP_DEMO_DIR),
+    name="windows-xp-simulation",
+)
 
 
 def json_response(status_code: int, body: dict) -> JSONResponse:
@@ -195,6 +202,7 @@ async def index() -> JSONResponse:
             "mode": "api-only",
             "docs": "/docs",
             "openapi": "/openapi.json",
+            "demo": "/windowsXP-simulation/demo.html",
             "endpoints": {
                 "health": "GET /api/health",
                 "status": "GET /api/status",

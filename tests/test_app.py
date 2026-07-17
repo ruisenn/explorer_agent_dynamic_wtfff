@@ -25,8 +25,23 @@ class AppRouteTests(unittest.IsolatedAsyncioTestCase):
         discovery = await self.client.get("/")
         self.assertEqual(discovery.status_code, 200)
         self.assertEqual(discovery.json()["mode"], "api-only")
+        self.assertEqual(
+            discovery.json()["demo"],
+            "/windowsXP-simulation/demo.html",
+        )
         self.assertEqual((await self.client.get("/sandbox")).status_code, 404)
         self.assertEqual((await self.client.get("/app.js")).status_code, 404)
+
+    async def test_windows_xp_demo_static_files(self) -> None:
+        page = await self.client.get("/windowsXP-simulation/demo.html")
+        self.assertEqual(page.status_code, 200)
+        self.assertTrue(page.headers["content-type"].startswith("text/html"))
+        self.assertIn("<!DOCTYPE html>", page.text)
+
+        wallpaper = await self.client.get("/windowsXP-simulation/img/bliss.jpg")
+        self.assertEqual(wallpaper.status_code, 200)
+        self.assertEqual(wallpaper.headers["content-type"], "image/jpeg")
+        self.assertGreater(len(wallpaper.content), 0)
 
     async def test_run_requires_json_content_type(self) -> None:
         response = await self.client.post("/api/run", content="{}", headers={"Content-Type": "text/plain"})
