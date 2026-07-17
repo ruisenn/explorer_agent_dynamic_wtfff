@@ -64,3 +64,7 @@ OpenAPI 文档：<http://127.0.0.1:3100/docs>
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -v
 ```
++ OpenAI-compatible `/chat/completions` Agent 
++ DOM 摘要、可选截图感知、实时浏览器画面和事件记录。
++ 运行和停止控制。
+
