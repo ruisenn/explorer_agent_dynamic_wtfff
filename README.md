@@ -1,6 +1,6 @@
 # Agent API
 
-Python + FastAPI + Playwright 实现的无前端浏览器 Agent 服务。Agent 会重复观察目标页面、
+Python + FastAPI + Playwright 实现的浏览器 Agent 服务。Agent 会重复观察目标页面、
 调用 OpenAI-compatible `/chat/completions` 规划单步动作，并在失败后重新观察和规划。
 
 ## 安装
