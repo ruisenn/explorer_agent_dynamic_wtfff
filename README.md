@@ -25,9 +25,9 @@ Playwright Chromium：
 .\.venv\Scripts\python.exe app.py
 ```
 
-接口发现：<http://127.0.0.1:3000/>
-沙箱 <http://127.0.0.1:3000/sandbox/>
-OpenAPI 文档：<http://127.0.0.1:3000/docs>
+接口发现：<http://127.0.0.1:3100/>
+沙箱 <http://127.0.0.1:3100/sandbox/>
+OpenAPI 文档：<http://127.0.0.1:3100/docs>
 
 ## 接口
 
