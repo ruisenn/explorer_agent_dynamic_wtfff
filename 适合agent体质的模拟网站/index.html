@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>气象数据面板 · Agent 测试沙箱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #eaf4fc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 30px 30px;
+            color: #1a2a3a;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 28px 32px 32px 32px;
+            box-shadow: 0 6px 24px rgba(0,20,40,0.08);
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h1 small {
+            font-size: 14px;
+            font-weight: 400;
+            color: #5a7a9a;
+            margin-left: 12px;
+        }
+        .subtitle {
+            color: #5a7a9a;
+            font-size: 14px;
+            margin: 4px 0 18px 0;
+            border-bottom: 1px solid #e2edf5;
+            padding-bottom: 14px;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: #f5f9fe;
+            padding: 14px 18px;
+            border-radius: 10px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .toolbar input, .toolbar select {
+            padding: 8px 14px;
+            border: 1px solid #cbdae6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            outline: none;
+        }
+        .toolbar input:focus, .toolbar select:focus {
+            border-color: #2b7be4;
+            box-shadow: 0 0 0 3px rgba(43, 123, 228, 0.15);
+        }
+        .toolbar input {
+            flex: 1;
+            min-width: 180px;
+        }
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary {
+            background: #2b7be4;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1a5fbf;
+        }
+        .btn-success {
+            background: #1f8b4a;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #15733b;
+        }
+        .btn-danger {
+            background: #d43d4a;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #b52a36;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #3a5a7a;
+            border: 1px solid #cbdae6;
+        }
+        .btn-outline:hover {
+            background: #f0f5fc;
+        }
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid #e2edf5;
+            border-radius: 10px;
+            margin: 12px 0 16px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 700px;
+        }
+        th {
+            background: #f5f9fe;
+            text-align: left;
+            padding: 12px 14px;
+            font-weight: 600;
+            border-bottom: 2px solid #e2edf5;
+            white-space: nowrap;
+        }
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eef4f8;
+            vertical-align: middle;
+        }
+        tr:hover {
+            background: #f9fcff;
+        }
+        tr.error-row {
+            background: #fff4f4 !important;
+            border-left: 3px solid #d43d4a;
+        }
+        tr.hidden-task {
+            background: #fff7e6 !important;
+        }
+        td input, td select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #cbdae6;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            outline: none;
+        }
+        td input:focus, td select:focus {
+            border-color: #2b7be4;
+            box-shadow: 0 0 0 2px rgba(43, 123, 228, 0.12);
+        }
+        td input[type="number"] {
+            width: 80px;
+        }
+        .row-status {
+            font-size: 13px;
+            font-weight: 500;
+            padding: 2px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .row-status.completed { background: #dff0d8; color: #1f6b3a; }
+        .row-status.pending { background: #fff3cd; color: #8a6d1f; }
+        .row-status.error { background: #f8d7da; color: #a12a36; }
+        .upload-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 18px;
+            background: #f5f9fe;
+            border-radius: 10px;
+            border: 1px dashed #cbdae6;
+            flex-wrap: wrap;
+            margin: 8px 0 4px 0;
+        }
+        .upload-progress {
+            width: 180px;
+            height: 6px;
+            background: #e2edf5;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .upload-progress .fill {
+            height: 100%;
+            width: 0%;
+            background: #2b7be4;
+            transition: width 0.25s;
+        }
+        .upload-status { font-size: 13px; color: #3a5a7a; }
+        .footer-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e2edf5;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .alert {
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin: 12px 0 6px 0;
+            display: none;
+            font-size: 14px;
+        }
+        .alert.error { display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert.success { display: block; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert.info { display: block; background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .dynamic-tag {
+            font-size: 11px;
+            background: #2b7be4;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+        .hidden-badge {
+            font-size: 11px;
+            background: #f0a030;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 12px;
+        }
+        .footer-note {
+            margin-top: 18px;
+            font-size: 12px;
+            color: #8aaac0;
+            text-align: center;
+            border-top: 1px solid #eef4f8;
+            padding-top: 14px;
+        }
+        .stat-badge {
+            font-size: 13px;
+            background: #eaf1f8;
+            padding: 4px 14px;
+            border-radius: 20px;
+            color: #1a3a5a;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>
+        🌤️ 气象数据面板
+        <small>Agent 测试沙箱 · 查询 · 筛选 · 填表 · 上传 · 提交</small>
+    </h1>
+    <div class="subtitle">近一个月气象观测记录 · 数据来自模拟气象站</div>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <input type="text" id="searchInput" placeholder="🔍 搜索日期或天气（如 07-15 / 晴）" oninput="applyFilters()">
+        <select id="filterWeather" onchange="applyFilters()">
+            <option value="">全部天气</option>
+            <option value="晴">☀️ 晴</option>
+            <option value="多云">⛅ 多云</option>
+            <option value="阴">☁️ 阴</option>
+            <option value="小雨">🌦️ 小雨</option>
+            <option value="中雨">🌧️ 中雨</option>
+            <option value="雪">❄️ 雪</option>
+        </select>
+        <select id="filterTemp" onchange="applyFilters()">
+            <option value="">全部气温</option>
+            <option value="hot">🔥 高温（≥30°C）</option>
+            <option value="warm">🌤️ 温暖（20-29°C）</option>
+            <option value="cool">🍂 凉爽（10-19°C）</option>
+            <option value="cold">❄️ 寒冷（<10°C）</option>
+        </select>
+        <span class="stat-badge" id="rowCount">📊 共 0 条记录</span>
+    </div>
+
+    <!-- 表格 -->
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:50px;">#</th>
+                    <th style="min-width:100px;">日期</th>
+                    <th style="min-width:70px;">气温(°C)</th>
+                    <th style="min-width:70px;">湿度(%)</th>
+                    <th style="min-width:80px;">风速(km/h)</th>
+                    <th style="min-width:100px;">天气</th>
+                    <th style="min-width:100px;">状态</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- JS 动态生成 -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 消息提示 -->
+    <div id="alertBox" class="alert"></div>
+
+    <!-- 上传区域 -->
+    <div class="upload-area">
+        <span style="font-weight:500;">📎 上传气象数据</span>
+        <input type="file" id="fileInput" accept=".csv,.json" style="display:none;">
+        <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">选择文件</button>
+        <span id="fileName" style="font-size:13px;color:#6a8aaa;">未选择文件</span>
+        <div class="upload-progress"><div class="fill" id="uploadFill"></div></div>
+        <span class="upload-status" id="uploadStatus">就绪</span>
+        <button class="btn btn-primary" id="uploadBtn" onclick="startUpload()">上传</button>
+    </div>
+
+    <!-- 底部操作 -->
+    <div class="footer-actions">
+        <button class="btn btn-success" onclick="submitAll()">✅ 提交全部数据</button>
+        <button class="btn btn-outline" onclick="resetTable()">↺ 重置</button>
+        <span style="font-size:13px;color:#6a8aaa;margin-left:auto;">
+            <span class="dynamic-tag">● 动态</span> 2秒后自动新增今日观测
+        </span>
+    </div>
+
+    <div class="footer-note">
+        🧩 隐藏任务：表格中存在一条“站点编号: 0000”的异常记录，请 Agent 识别并处理
+    </div>
+</div>
+
+<script>
+    // =============================================================
+    // 1. 初始气象数据（近一个月）
+    // =============================================================
+    let rowId = 1;
+    const baseData = [
+        { date: '2026-06-20', temp: 32, humidity: 55, wind: 12, weather: '晴' },
+        { date: '2026-06-22', temp: 28, humidity: 62, wind: 8, weather: '多云' },
+        { date: '2026-06-25', temp: 19, humidity: 78, wind: 15, weather: '小雨' },
+        { date: '2026-06-28', temp: 14, humidity: 85, wind: 22, weather: '中雨' },
+        { date: '2026-07-01', temp: 34, humidity: 48, wind: 10, weather: '晴' },
+        { date: '2026-07-03', temp: 31, humidity: 52, wind: 7, weather: '晴' },
+        { date: '2026-07-05', temp: 26, humidity: 60, wind: 14, weather: '多云' },
+        { date: '2026-07-07', temp: 22, humidity: 72, wind: 18, weather: '阴' },
+        // ★ 隐藏任务：站点编号异常的数据
+        { date: '0000-00-00', temp: 0, humidity: 0, wind: 0, weather: '异常', hidden: true },
+        { date: '2026-07-09', temp: 17, humidity: 80, wind: 20, weather: '小雨' },
+        { date: '2026-07-11', temp: 29, humidity: 58, wind: 9, weather: '多云' },
+        { date: '2026-07-13', temp: 33, humidity: 45, wind: 11, weather: '晴' },
+        { date: '2026-07-15', temp: 25, humidity: 65, wind: 13, weather: '阴' },
+    ];
+
+    let rows = [];
+    let uploadProgress = 0;
+    let isUploading = false;
+    let dynamicAdded = false;
+
+    // =============================================================
+    // 2. 渲染表格
+    // =============================================================
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        data.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            tr.dataset.index = index;
+            tr.dataset.id = row.id;
+            if (row.hidden) {
+                tr.classList.add('hidden-task');
+            }
+            // 检查是否填写完整
+            const isComplete = row.date && row.date.length === 10 && row.temp > -50 && row.temp < 60 && row.humidity >= 0 && row.humidity <= 100 && row.wind >= 0 && row.weather && row.weather !== '请选择';
+            if (!isComplete && !row.hidden) {
+                tr.classList.add('error-row');
+            }
+
+            const weatherOptions = ['晴', '多云', '阴', '小雨', '中雨', '雪', '异常'];
+            tr.innerHTML = `
+                <td style="text-align:center;font-weight:500;">${row.id}</td>
+                <td>
+                    <input type="date" value="${row.date}" 
+                           onchange="updateField(${index}, 'date', this.value)"
+                           ${row.hidden ? 'style="background:#fff7e6;"' : ''}>
+                </td>
+                <td>
+                    <input type="number" step="0.5" min="-30" max="50" value="${row.temp}" 
+                           onchange="updateField(${index}, 'temp', parseFloat(this.value) || 0)"
+                           style="width:70px;">
+                </td>
+                <td>
+                    <input type="number" step="1" min="0" max="100" value="${row.humidity}" 
+                           onchange="updateField(${index}, 'humidity', parseFloat(this.value) || 0)"
+                           style="width:70px;">
+                </td>
+                <td>
+                    <input type="number" step="1" min="0" max="150" value="${row.wind}" 
+                           onchange="updateField(${index}, 'wind', parseFloat(this.value) || 0)"
+                           style="width:70px;">
+                </td>
+                <td>
+                    <select onchange="updateField(${index}, 'weather', this.value)">
+                        ${weatherOptions.map(w => `<option value="${w}" ${row.weather === w ? 'selected' : ''}>${w}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <span class="row-status ${row.status === '已完成' ? 'completed' : row.hidden ? 'error' : 'pending'}">
+                        ${row.status || '待填写'}
+                    </span>
+                    ${row.hidden ? '<span class="hidden-badge">隐藏任务</span>' : ''}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('rowCount').textContent = `📊 共 ${data.length} 条记录`;
+    }
+
+    // =============================================================
+    // 3. 数据操作
+    // =============================================================
+    function updateField(index, field, value) {
+        if (rows[index]) {
+            rows[index][field] = value;
+            // 如果所有字段都填好了，自动标记为已完成
+            const r = rows[index];
+            if (r.date && r.date.length === 10 && r.temp > -50 && r.temp < 60 && r.humidity >= 0 && r.humidity <= 100 && r.wind >= 0 && r.weather && r.weather !== '请选择' && r.weather !== '异常') {
+                r.status = '已完成';
+            } else if (!r.hidden) {
+                r.status = '待填写';
+            }
+            applyFilters();
+        }
+    }
+
+    function applyFilters() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const weather = document.getElementById('filterWeather').value;
+        const tempFilter = document.getElementById('filterTemp').value;
+
+        let filtered = rows.filter(row => {
+            const matchSearch = row.date.includes(search) || row.weather.includes(search);
+            const matchWeather = weather === '' || row.weather === weather;
+            let matchTemp = true;
+            if (tempFilter === 'hot') matchTemp = row.temp >= 30;
+            else if (tempFilter === 'warm') matchTemp = row.temp >= 20 && row.temp < 30;
+            else if (tempFilter === 'cool') matchTemp = row.temp >= 10 && row.temp < 20;
+            else if (tempFilter === 'cold') matchTemp = row.temp < 10;
+            return matchSearch && matchWeather && matchTemp;
+        });
+        renderTable(filtered);
+    }
+
+    function resetTable() {
+        rows = baseData.map((d, i) => ({
+            id: i + 1,
+            date: d.date,
+            temp: d.temp,
+            humidity: d.humidity,
+            wind: d.wind,
+            weather: d.weather,
+            hidden: d.hidden || false,
+            status: d.hidden ? '异常' : '待填写'
+        }));
+        dynamicAdded = false;
+        document.getElementById('searchInput').value = '';
+        document.getElementById('filterWeather').value = '';
+        document.getElementById('filterTemp').value = '';
+        document.getElementById('uploadFill').style.width = '0%';
+        document.getElementById('uploadStatus').textContent = '就绪';
+        document.getElementById('fileName').textContent = '未选择文件';
+        document.getElementById('fileInput').value = '';
+        hideAlert();
+        applyFilters();
+        setTimeout(addDynamicRow, 2000);
+    }
+
+    // =============================================================
+    // 4. 动态页面
+    // =============================================================
+    function addDynamicRow() {
+        if (dynamicAdded) return;
+        const today = new Date().toISOString().slice(0, 10);
+        rows.push({
+            id: rows.length + 1,
+            date: today,
+            temp: 26.5,
+            humidity: 58,
+            wind: 8,
+            weather: '多云',
+            hidden: false,
+            status: '待填写'
+        });
+        dynamicAdded = true;
+        applyFilters();
+        showAlert(`📌 动态变化：已自动新增今日观测数据（${today}）`, 'info');
+    }
+
+    // =============================================================
+    // 5. 上传
+    // =============================================================
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        if (this.files.length > 0) {
+            document.getElementById('fileName').textContent = this.files[0].name;
+        }
+    });
+
+    function startUpload() {
+        if (isUploading) return;
+        const fileInput = document.getElementById('fileInput');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showAlert('⚠️ 请先选择要上传的文件（CSV或JSON）', 'error');
+            return;
+        }
+        isUploading = true;
+        document.getElementById('uploadBtn').disabled = true;
+        document.getElementById('uploadStatus').textContent = '上传中...';
+        uploadProgress = 0;
+        const fill = document.getElementById('uploadFill');
+
+        const interval = setInterval(() => {
+            uploadProgress += 5;
+            fill.style.width = uploadProgress + '%';
+            if (uploadProgress >= 100) {
+                clearInterval(interval);
+                document.getElementById('uploadStatus').textContent = '✅ 上传成功！';
+                document.getElementById('uploadBtn').disabled = false;
+                isUploading = false;
+                showAlert('📎 气象数据文件上传成功！', 'success');
+            }
+        }, 120);
+    }
+
+    // =============================================================
+    // 6. 提交 + 隐藏任务检查
+    // =============================================================
+    function submitAll() {
+        let incomplete = [];
+        rows.forEach((row, idx) => {
+            if (row.hidden) return;
+            const isComplete = row.date && row.date.length === 10 && row.temp > -50 && row.temp < 60 && row.humidity >= 0 && row.humidity <= 100 && row.wind >= 0 && row.weather && row.weather !== '请选择' && row.weather !== '异常';
+            if (!isComplete) incomplete.push(idx);
+        });
+
+        if (incomplete.length > 0) {
+            const tbody = document.getElementById('tableBody');
+            tbody.querySelectorAll('tr').forEach((tr, idx) => {
+                if (incomplete.includes(idx)) {
+                    tr.classList.add('error-row');
+                }
+            });
+            showAlert(`⚠️ 有 ${incomplete.length} 条记录数据不完整，请补充后再提交`, 'error');
+            return;
+        }
+
+        if (confirm('确认提交全部气象数据吗？')) {
+            const hiddenRow = rows.find(r => r.hidden);
+            let msg = '✅ 全部气象数据提交成功！';
+            if (hiddenRow) {
+                const isHandled = hiddenRow.weather === '异常' || hiddenRow.status === '异常';
+                msg += isHandled ? ' 🧩 隐藏任务已识别（异常站点已标记）' : ' ⚠️ 隐藏任务未被识别（异常站点未被标记）';
+            }
+            showAlert(msg, 'success');
+            rows.forEach(r => {
+                if (!r.hidden && r.status !== '已完成') {
+                    r.status = '已完成';
+                }
+            });
+            applyFilters();
+        }
+    }
+
+    // =============================================================
+    // 7. 辅助
+    // =============================================================
+    function showAlert(msg, type) {
+        const box = document.getElementById('alertBox');
+        box.className = 'alert ' + type;
+        box.textContent = msg;
+        box.style.display = 'block';
+        clearTimeout(window.alertTimer);
+        window.alertTimer = setTimeout(() => { box.style.display = 'none'; }, 5000);
+    }
+    function hideAlert() { document.getElementById('alertBox').style.display = 'none'; }
+
+    // =============================================================
+    // 8. 启动
+    // =============================================================
+    resetTable();
+</script>
+</body>
+</html>
